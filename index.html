@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+     <head>
+          <meta charset="utf-8">
+          <title>AJAYI CROWTHER UNIVERSITY EVANS UNIT</title>
+     </head>
+     <body>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        header { background: linear-gradient(45deg, #28a745, #20c997); color: white; text-align: center; padding: 30px; }
+        h1 { font-size: 2.2em; margin-bottom: 10px; }
+        .clock { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        nav { display: flex; background: #f8f9fa; overflow-x: auto; }
+        nav button { flex: 1; padding: 15px; border: none; background: none; font-size: 1.1em; cursor: pointer; transition: background 0.3s; }
+        nav button.active { background: #007bff; color: white; }
+        nav button:hover { background: #e9ecef; }
+        section { display: none; padding: 30px; min-height: 60vh; }
+        section.active { display: block; }
+        .input-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        input, textarea, button { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        .delete-btn { background: #dc3545; font-size: 0.9em; padding: 5px 10px; }
+        .delete-btn:hover { background: #c82333; }
+        .item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .devotional { text-align: center; }
+        .verse { font-size: 1.3em; font-style: italic; color: #28a745; margin: 20px 0; }
+        @media (max-width: 600px) { .clock { font-size: 2em; } nav { flex-direction: column; } }
+        .alarm-list { max-height: 300px; overflow-y: auto; }
+        #prayer-notes { resize: vertical; min-height: 150px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕊️ ACU Chaplaincy Devotional Hub</h1>
+            <p>Raising Godly Intellectuals | Ajayi Crowther University, Oyo</p>
+            <div id="clock" class="clock">00:00:00 AM</div>
+        </header>
+        <nav>
+            <button onclick="showSection('home')" class="active">Home</button>
+            <button onclick="showSection('alarm')">Quiet Time Alarm</button>
+            <button onclick="showSection('library')">Book Library</button>
+            <button onclick="showSection('devotional')">Daily Devotion</button>
+            <button onclick="showSection('prayer')">Prayer Notes</button>
+            <button onclick="showSection('chapel')">Chapel Info</button>
+        </nav>
+        <section id="home" class="active">
+            <h2>Welcome to ACU Chaplaincy Hub</h2>
+            <p>Use this app for Bible study, alarms for power vigils, library for devotionals, and notes for discipleship. All data saves locally.[page:0]</p>
+            <div class="verse">"Raise Godly intellectuals who transform the world." - ACU Vision</div>
+        </section>
+        <section id="alarm">
+            <h2>Set Quiet Time Alarm</h2>
+            <div class="input-group">
+                <label>Date: <input type="date" id="alarmDate" min></label>
+                <label>Time: <input type="time" id="alarmTime"></label>
+                <button onclick="setAlarm()">Set Alarm (Max 3)</button>
+            </div>
+            <div id="alarms" class="alarm-list"></div>
+        </section>
+        <section id="library">
+            <h2>Devotional Book Library</h2>
+            <div class="input-group">
+                <label>Book Title: <input id="bookTitle"></label>
+                <label>Verse/Key Note: <textarea id="bookNote" rows="3"></textarea></label>
+                <button onclick="addBook()">Add Book</button>
+            </div>
+            <div id="books"></div>
+        </section>
+        <section id="devotional">
+            <h2>Daily Devotion</h2>
+            <div class="devotional">
+                <div class="verse" id="dailyVerse">John 3:16 - For God so loved the world...</div>
+                <p>Reflect: How does this apply to your engineering studies at ACU?</p>
+                <button onclick="newDevotion()">New Devotion</button>
+            </div>
+        </section>
+        <section id="prayer">
+            <h2>Quiet Time Prayer Notes</h2>
+            <textarea id="prayer-notes" placeholder="Write your prayers, reflections..."></textarea>
+            <button onclick="savePrayer()" style="margin-top: 10px;">Save Notes</button>
+            <button onclick="loadPrayer()" style="margin-top: 10px; background: #28a745;">Load Notes</button>
+        </section>
+        <section id="chapel">
+            <h2>ACU Chapel Activities</h2>
+            <ul>
+                <li>Bible Study (Weekly in halls)</li>
+                <li>Discipleship Class (8 weeks)</li>
+                <li>Power Vigil (Last Friday monthly)</li>
+                <li>Choir, Drama, Intercessors</li>
+            </ul>
+            <p>Join for spiritual growth![page:0]</p>
+        </section>
+    </div>
+    <script>
+        // Live Clock
+        function updateClock() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', options);
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // Navigation
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            if (id === 'alarm') loadAlarms();
+            if (id === 'library') loadBooks();
+        }
+
+        // Alarm (Adapted from reliable clock impl.[page:1])
+        let alarms = JSON.parse(localStorage.getItem('acuAlarms')) || [];
+        function setAlarm() {
+            const date = document.getElementById('alarmDate').value;
+            const time = document.getElementById('alarmTime').value;
+            if (!date || !time) return alert('Select date & time');
+            const alarmTime = new Date(date + 'T' + time).getTime();
+            const now = Date.now();
+            if (alarmTime <= now) return alert('Future time only');
+            if (alarms.length >= 3) return alert('Max 3 alarms');
+            if (alarms.some(a => a.time === alarmTime)) return alert('Duplicate alarm');
+            const id = Date.now();
+            alarms.push({ id, time: alarmTime, str: new Date(alarmTime).toLocaleString() });
+            localStorage.setItem('acuAlarms', JSON.stringify(alarms));
+            const timeout = setTimeout(() => alert('🔔 Quiet Time! "Seek first the kingdom..." - Matthew 6:33'), alarmTime - now);
+            alarms[alarms.length-1].timeout = timeout;
+            loadAlarms();
+        }
+        function loadAlarms() {
+            const cont = document.getElementById('alarms');
+            cont.innerHTML = '';
+            alarms.forEach(alarm => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<span>${alarm.str}</span><button class="delete-btn" onclick="deleteAlarm(${alarm.id})">Delete</button>`;
+                cont.appendChild(div);
+            });
+        }
+        function deleteAlarm(id) {
+            alarms = alarms.filter(a => a.id !== id);
+            localStorage.setItem('acuAlarms', JSON.stringify(alarms));
+            loadAlarms();
+        }
+
+        // Library
+        function addBook() {
+            const title = document.getElementById('bookTitle').value;
+            const note = document.getElementById('bookNote').value;
+            if (!title || !note) return alert('Fill title & note');
+            const books = JSON.parse(localStorage.getItem('acuBooks')) || [];
+            books.push({ title, note });
+            localStorage.setItem('acuBooks', JSON.stringify(books));
+            document.getElementById('bookTitle').value = '';
+            document.getElementById('bookNote').value = '';
+            loadBooks();
+        }
+        function loadBooks() {
+            const cont = document.getElementById('books');
+            const books = JSON.parse(localStorage.getItem('acuBooks')) || [];
+            cont.innerHTML = books.map((b, i) => `<div class="item">${b.title}: "${b.note}" <button class="delete-btn" onclick="deleteBook(${i})">Delete</button></div>`).join('');
+        }
+        function deleteBook(i) {
+            const books = JSON.parse(localStorage.getItem('acuBooks')) || [];
+            books.splice(i, 1);
+            localStorage.setItem('acuBooks', JSON.stringify(books));
+            loadBooks();
+        }
+
+        // Devotional (Simple rotation)
+        const verses = ['John 3:16 - For God so loved...', 'Phil 4:13 - I can do all things...', 'Prov 3:5-6 - Trust in the Lord...'];
+        function newDevotion() {
+            const rand = Math.floor(Math.random() * verses.length);
+            document.getElementById('dailyVerse').textContent = verses[rand];
+        }
+
+        // Prayer Notes
+        function savePrayer() {
+            localStorage.setItem('acuPrayer', document.getElementById('prayer-notes').value);
+            alert('Saved!');
+        }
+        function loadPrayer() {
+            document.getElementById('prayer-notes').value = localStorage.getItem('acuPrayer') || '';
+        }
+
+        // Init
+        updateClock();
+        loadAlarms();
+        loadBooks();
+    </script>
+</body>
+</html>
+          
+</html>
